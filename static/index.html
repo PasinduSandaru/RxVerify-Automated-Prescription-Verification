@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RxVerify: Automated Prescription & Dispensed Medication Validation System</title>
+    <!-- Modern Outfit and Inter Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Vanilla CSS Stylesheet -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Background elements -->
+    <div class="glass-bg-glow glow-primary"></div>
+    <div class="glass-bg-glow glow-secondary"></div>
+
+    <!-- Header bar -->
+    <header class="app-header">
+        <div class="header-logo">
+            <span class="logo-icon">🛡️</span>
+            <h1>RxVerify</h1>
+        </div>
+        <nav class="header-nav">
+            <span id="user-display" class="user-badge hide">Pharmacist: dr_john</span>
+            <button id="theme-btn" class="icon-btn" title="Toggle theme">🌓</button>
+            <button id="logout-btn" class="btn btn-secondary hide">Logout</button>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="app-container">
+        
+        <!-- ==================== VIEW 1: AUTHENTICATION ==================== -->
+        <section id="auth-view" class="view-panel active">
+            <div class="auth-card glass-panel">
+                <div class="auth-tabs">
+                    <button id="tab-login" class="auth-tab active">Login</button>
+                    <button id="tab-register" class="auth-tab">Register</button>
+                </div>
+                
+                <form id="auth-form" class="auth-form">
+                    <h2 id="auth-title">Welcome Back</h2>
+                    <p id="auth-subtitle" class="auth-subtitle">Log in to process and validate prescriptions safely.</p>
+                    
+                    <div class="alert alert-danger hide" id="auth-alert"></div>
+
+                    <div class="form-group">
+                        <label for="auth-username">Username</label>
+                        <input type="text" id="auth-username" required placeholder="Enter username">
+                    </div>
+                    
+                    <div class="form-group hide" id="email-group">
+                        <label for="auth-email">Email Address</label>
+                        <input type="email" id="auth-email" placeholder="john@rxverify.org">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="auth-password">Password</label>
+                        <input type="password" id="auth-password" required placeholder="••••••••">
+                    </div>
+
+                    <div class="form-group hide" id="role-group">
+                        <label for="auth-role">System Role</label>
+                        <select id="auth-role">
+                            <option value="Pharmacist">Pharmacist (Validate & Upload)</option>
+                            <option value="Supervisor">Supervisor (Audit Log & Integrity)</option>
+                            <option value="Admin">System Administrator</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="auth-submit" class="btn btn-primary btn-block">Sign In</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 2: DASHBOARD ==================== -->
+        <section id="dashboard-view" class="view-panel hide">
+            <!-- Summary stats -->
+            <div class="stats-row">
+                <div class="stat-card glass-panel">
+                    <span class="stat-icon">📄</span>
+                    <div class="stat-details">
+                        <h3 id="stat-total-rx">0</h3>
+                        <p>Total Uploads</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <span class="stat-icon text-success">✅</span>
+                    <div class="stat-details">
+                        <h3 id="stat-passed">0</h3>
+                        <p>Valid Dispenses</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <span class="stat-icon text-danger">⚠️</span>
+                    <div class="stat-details">
+                        <h3 id="stat-mismatches">0</h3>
+                        <p>Mismatches Caught</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-panel">
+                    <span class="stat-icon text-warning">🛡️</span>
+                    <div class="stat-details">
+                        <h3 id="stat-integrity">100%</h3>
+                        <p>Data Integrity Status</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload prescription trigger -->
+            <div class="action-bar">
+                <h2>Prescription Validation Center</h2>
+                <button id="go-upload-btn" class="btn btn-primary">+ Upload New Prescription</button>
+            </div>
+
+            <!-- Table of recent uploads -->
+            <div class="table-container glass-panel">
+                <div class="table-header">
+                    <h3>Recent Prescription Validation Logs</h3>
+                    <button id="refresh-db-btn" class="btn btn-secondary btn-sm">Refresh Lists</button>
+                </div>
+                <table class="data-table" id="prescription-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Patient Name</th>
+                            <th>Doctor Name</th>
+                            <th>Validation Status</th>
+                            <th>Security Audit</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Inserted dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Audit Logs Panel (restricted view) -->
+            <div class="table-container glass-panel mt-4" id="audit-log-panel">
+                <div class="table-header">
+                    <h3 class="text-warning">System Security Audit Logs</h3>
+                    <span class="badge badge-restricted">Supervisor / Admin View Only</span>
+                </div>
+                <div class="audit-log-scroller">
+                    <table class="data-table" id="audit-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>IP Address</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Inserted dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 3: UPLOAD PRESCRIPTION ==================== -->
+        <section id="upload-view" class="view-panel hide">
+            <div class="back-link">
+                <button class="btn-link" onclick="app.showPanel('dashboard')">← Back to Dashboard</button>
+            </div>
+            
+            <div class="split-layout">
+                <div class="glass-panel">
+                    <h3>Upload Prescription Image</h3>
+                    <p class="description">Select or drop a prescription file (.jpg, .png). It will be encrypted locally with AES-256 before disk storage.</p>
+                    
+                    <form id="upload-form">
+                        <div class="form-group">
+                            <label for="rx-patient">Patient Name</label>
+                            <input type="text" id="rx-patient" required placeholder="Alice Smith">
+                        </div>
+                        <div class="form-group">
+                            <label for="rx-doctor">Doctor Name</label>
+                            <input type="text" id="rx-doctor" required placeholder="Dr. Mewan Jayathilake">
+                        </div>
+                        <div class="form-group">
+                            <label for="rx-date">Prescription Date</label>
+                            <input type="date" id="rx-date" required>
+                        </div>
+                        
+                        <!-- Drag and Drop area -->
+                        <div class="drop-zone" id="drop-zone">
+                            <span class="drop-icon">📤</span>
+                            <span class="drop-text">Drag & Drop prescription image here or click to browse</span>
+                            <input type="file" id="rx-image" accept="image/*" class="hide" required>
+                            <div class="file-info hide" id="file-info"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block mt-4" id="upload-submit-btn">
+                            Encrypt File & Parse OCR
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="glass-panel ocr-preview-panel">
+                    <h3>OCR Extraction Preview</h3>
+                    <p class="description">Tesseract raw OCR logs, regex corrections, and parsed list of medicines.</p>
+                    <div class="ocr-status-loader hide" id="ocr-loader">
+                        <div class="spinner"></div>
+                        <p>Processing OpenCV Pipeline & PyTesseract Engine...</p>
+                    </div>
+                    
+                    <div id="ocr-results-area" class="ocr-results-area">
+                        <div class="placeholder-text">Upload a prescription to view real-time OCR results.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 4: MEDICINE ENTRY & RESULTS ==================== -->
+        <section id="validation-view" class="view-panel hide">
+            <div class="back-link">
+                <button class="btn-link" onclick="app.showPanel('dashboard')">← Back to Dashboard</button>
+            </div>
+            
+            <div class="split-layout">
+                <!-- Left panel: Dispense form -->
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <h3>Pharmacist Medicine Dispensing Entry</h3>
+                        <span id="validation-rx-patient" class="text-accent font-bold">Patient: -</span>
+                    </div>
+                    <p class="description">Manually input the medicines you are dispensing to the patient. They will be cross-checked against the OCR-extracted data.</p>
+                    
+                    <form id="dispense-form">
+                        <div class="table-container-sm">
+                            <table class="entry-table" id="dispense-entry-table">
+                                <thead>
+                                    <tr>
+                                        <th>Drug Name</th>
+                                        <th>Dosage</th>
+                                        <th>Unit</th>
+                                        <th>Qty</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Populated dynamically with rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm mt-2" id="add-drug-row-btn">+ Add Drug</button>
+                        
+                        <button type="submit" class="btn btn-primary btn-block mt-4" id="verify-dispense-btn">
+                            Run Rule Validation
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Right panel: Comparison & Results -->
+                <div class="glass-panel">
+                    <h3>Validation Report</h3>
+                    <p class="description">Fuzzy Jaro-Winkler comparison logs. Status output alerts.</p>
+                    
+                    <div class="validation-status-loader hide" id="validation-loader">
+                        <div class="spinner"></div>
+                        <p>Calculating Levenshtein/Jaro-Winkler distance and running rules...</p>
+                    </div>
+
+                    <div id="validation-results-area" class="validation-results-area">
+                        <div class="placeholder-text">Enter dispensed drugs and press 'Run Rule Validation' to view comparison results.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>RxVerify © 2026 - BSc (Hons) Computer Network and Cyber Security Final Year Project</p>
+    </footer>
+
+    <!-- App JavaScript Logic -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
