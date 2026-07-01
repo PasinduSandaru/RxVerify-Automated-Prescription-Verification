@@ -1,6 +1,6 @@
 import os
-from app import create_app
-from app.database import db
+from routes import create_app
+from database import db
 
 # Instantiate the Flask application via the factory method
 app = create_app()
